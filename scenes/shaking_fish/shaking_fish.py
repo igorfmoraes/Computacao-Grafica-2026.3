@@ -28,7 +28,7 @@ def main():
             water_data_organization,
             1.0,
             (0.0, 0.0),
-            (0.0, 0.0, 1.0, 1.0),
+            (0.0, 1.0, 1.0, 1.0),
             water_shader,
         )
 
@@ -52,14 +52,40 @@ def construct_vertex_data_and_organization(vertices, context, shaders_program):
     # Vertex Buffer Object, stores the raw data (position) to be sent to the GPU
     vertex_data = context.buffer(np.asarray(vertices, dtype="f4").tobytes())
 
+    vertices_indices = convert_shape_to_triangle_fan(vertices)
+    vertices_indices_bytes = context.buffer(
+        np.array(vertices_indices, dtype="i4").tobytes()
+    )
+
     # Vertex Array Objet, defines the organization/structure of the data (where to split, how to map)
     # 2 floats to be stores in vPosition (x, y)
     vertex_data_organization = context.vertex_array(
         shaders_program,
         [(vertex_data, "2f", "vPosition")],
+        index_buffer=vertices_indices_bytes,
     )
 
     return vertex_data, vertex_data_organization
+
+
+def convert_shape_to_triangle_fan(vertices):
+    number_of_vertices = len(vertices) - 2
+    midpoint_index = number_of_vertices // 2
+
+    bottom_right_index = number_of_vertices
+    bottom_left_index = number_of_vertices + 1
+
+    vertices_indices = []
+
+    for vertex_index in range(midpoint_index):
+        vertices_indices.extend([bottom_left_index, vertex_index, vertex_index + 1])
+
+    for vertex_index in range(midpoint_index, number_of_vertices - 1):
+        vertices_indices.extend([bottom_right_index, vertex_index, vertex_index + 1])
+
+    vertices_indices.extend([bottom_left_index, midpoint_index, bottom_right_index])
+
+    return vertices_indices
 
 
 def draw_shape(
@@ -68,7 +94,7 @@ def draw_shape(
     offset,
     color,
     shaders_program,
-    mode=moderngl.LINE_LOOP,
+    mode=moderngl.TRIANGLES,
 ):
     set_uniform_value("u_scale", scale, shaders_program)
     set_uniform_value("u_offset", offset, shaders_program)
