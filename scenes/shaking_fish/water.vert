@@ -16,5 +16,5 @@ void main() {
     float x = vPosition.x + cos(u_time * u_frequency/2 + (vPosition.x + vPosition.y) / 4) / 24;
     gl_Position = vec4(x * u_scale + u_offset.x, y * u_scale + u_offset.y, 0.0, 1.0);
 
-    v2fcolor = u_color;
+    v2fcolor = vec4(u_color.r, u_color.g + sin(vPosition.x * vPosition.y + u_time) / 8, u_color.b+ cos(vPosition.x * vPosition.y + u_time) / 8, u_color.a);
 }

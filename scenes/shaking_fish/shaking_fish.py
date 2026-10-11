@@ -44,7 +44,12 @@ def main():
 
     while not glfw.window_should_close(window):
         elapsed_time = glfw.get_time()
-        current_context.clear(1.0, 1.0, 1.0, 1.0)
+        current_context.clear(
+            np.sqrt(frequency / amplitude) / 1.5 * attenuation,
+            0.45 + np.cos(elapsed_time) / 16 * attenuation,
+            0.92 + np.sin(elapsed_time) / 16 * attenuation,
+            1.0,
+        )
 
         set_uniform_value("u_frequency", frequency, water_shader)
         set_uniform_value("u_amplitude", amplitude, water_shader)
@@ -75,14 +80,14 @@ def main():
         draw_shape(
             circle_data_organization,
             0.05,
-            (0.12, -0.1),
+            (0.12 + np.cos(elapsed_time * 0.5 * frequency) / amplitude / 2, -0.1),
             (0.85, 0.85, 1.0, 1.0),
             body_shader,
         )
         draw_shape(
             circle_data_organization,
             0.05,
-            (0.22, -0.1),
+            (0.22 + np.cos(elapsed_time * 0.5 * frequency) / amplitude / 2, -0.1),
             (0.85, 0.85, 1.0, 1.0),
             body_shader,
         )
@@ -90,14 +95,14 @@ def main():
         draw_shape(
             circle_data_organization,
             0.02,
-            (0.15, -0.1),
+            (0.14 + np.cos(elapsed_time * 0.5 * frequency) / amplitude / 1.8, -0.1),
             (0.15, 0.15, 0.25, 1.0),
             body_shader,
         )
         draw_shape(
             circle_data_organization,
             0.02,
-            (0.25, -0.1),
+            (0.24 + np.cos(elapsed_time * 0.5 * frequency) / amplitude / 1.8, -0.1),
             (0.15, 0.15, 0.25, 1.0),
             body_shader,
         )
