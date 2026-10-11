@@ -15,7 +15,6 @@ dark_mode = False
 
 
 def main():
-    window = create_window()
     context = create_context(window)
 
     water_shader = context.program(
@@ -38,26 +37,38 @@ def main():
     )
 
     circle = construct_circle()
-    circle_raw_data, circle_data_organization = construct_vertex_buffer_and_organization(
-        circle, context, body_shader
+    circle_raw_data, circle_data_organization = (
+        construct_vertex_buffer_and_organization(circle, context, body_shader)
     )
 
     while not glfw.window_should_close(window):
         elapsed_time_seconds = glfw.get_time()
         context.clear(
-            np.sqrt(wave_frequency_multiplier / wave_amplitude_divisor) / 1.5 * brightness_multiplier,
+            np.sqrt(wave_frequency_multiplier / wave_amplitude_divisor)
+            / 1.5
+            * brightness_multiplier,
             (0.45 + np.cos(elapsed_time_seconds) / 16) * brightness_multiplier,
             (0.92 + np.sin(elapsed_time_seconds) / 16) * brightness_multiplier,
             1.0,
         )
 
-        set_uniform_value("u_wave_frequency_multiplier", wave_frequency_multiplier, water_shader)
-        set_uniform_value("u_wave_amplitude_divisor", wave_amplitude_divisor, water_shader)
-        set_uniform_value("u_brightness_multiplier", brightness_multiplier, water_shader)
+        set_uniform_value(
+            "u_wave_frequency_multiplier", wave_frequency_multiplier, water_shader
+        )
+        set_uniform_value(
+            "u_wave_amplitude_divisor", wave_amplitude_divisor, water_shader
+        )
+        set_uniform_value(
+            "u_brightness_multiplier", brightness_multiplier, water_shader
+        )
         set_uniform_value("u_time", elapsed_time_seconds, water_shader)
 
-        set_uniform_value("u_wave_frequency_multiplier", wave_frequency_multiplier, body_shader)
-        set_uniform_value("u_wave_amplitude_divisor", wave_amplitude_divisor, body_shader)
+        set_uniform_value(
+            "u_wave_frequency_multiplier", wave_frequency_multiplier, body_shader
+        )
+        set_uniform_value(
+            "u_wave_amplitude_divisor", wave_amplitude_divisor, body_shader
+        )
         set_uniform_value("u_brightness_multiplier", brightness_multiplier, body_shader)
         set_uniform_value("u_time", elapsed_time_seconds, body_shader)
 
@@ -80,14 +91,26 @@ def main():
         draw_shape(
             circle_data_organization,
             0.05,
-            (0.12 + np.cos(elapsed_time_seconds * 0.5 * wave_frequency_multiplier) / wave_amplitude_divisor / 2, -0.1),
+            (
+                0.12
+                + np.cos(elapsed_time_seconds * 0.5 * wave_frequency_multiplier)
+                / wave_amplitude_divisor
+                / 2,
+                -0.1,
+            ),
             (0.85, 0.85, 1.0, 1.0),
             body_shader,
         )
         draw_shape(
             circle_data_organization,
             0.05,
-            (0.22 + np.cos(elapsed_time_seconds * 0.5 * wave_frequency_multiplier) / wave_amplitude_divisor / 2, -0.1),
+            (
+                0.22
+                + np.cos(elapsed_time_seconds * 0.5 * wave_frequency_multiplier)
+                / wave_amplitude_divisor
+                / 2,
+                -0.1,
+            ),
             (0.85, 0.85, 1.0, 1.0),
             body_shader,
         )
@@ -95,14 +118,26 @@ def main():
         draw_shape(
             circle_data_organization,
             0.02,
-            (0.14 + np.cos(elapsed_time_seconds * 0.5 * wave_frequency_multiplier) / wave_amplitude_divisor / 1.8, -0.1),
+            (
+                0.14
+                + np.cos(elapsed_time_seconds * 0.5 * wave_frequency_multiplier)
+                / wave_amplitude_divisor
+                / 1.8,
+                -0.1,
+            ),
             (0.15, 0.15, 0.25, 1.0),
             body_shader,
         )
         draw_shape(
             circle_data_organization,
             0.02,
-            (0.24 + np.cos(elapsed_time_seconds * 0.5 * wave_frequency_multiplier) / wave_amplitude_divisor / 1.8, -0.1),
+            (
+                0.24
+                + np.cos(elapsed_time_seconds * 0.5 * wave_frequency_multiplier)
+                / wave_amplitude_divisor
+                / 1.8,
+                -0.1,
+            ),
             (0.15, 0.15, 0.25, 1.0),
             body_shader,
         )
@@ -143,9 +178,7 @@ def construct_vertex_buffer_and_organization(vertices, context, shaders_program)
     vertex_buffer = context.buffer(np.asarray(vertices, dtype="f4").tobytes())
 
     vertices_indices = triangulate_surface_between_two_corners(vertices)
-    index_buffer = context.buffer(
-        np.array(vertices_indices, dtype="i4").tobytes()
-    )
+    index_buffer = context.buffer(np.array(vertices_indices, dtype="i4").tobytes())
 
     # Vertex Array Objet, defines the organization/structure of the data (where to split, how to map)
     # 2 floats to be stores in vPosition (x, y)
@@ -242,9 +275,13 @@ def process_key(window, key, scancode, action, mods):
     if key == glfw.KEY_ESCAPE:
         glfw.set_window_should_close(window, True)
     elif key == glfw.KEY_A:
-        wave_amplitude_divisor = possible_wave_amplitude_divisors[possible_wave_amplitude_divisors.index(wave_amplitude_divisor) - 1]
+        wave_amplitude_divisor = possible_wave_amplitude_divisors[
+            possible_wave_amplitude_divisors.index(wave_amplitude_divisor) - 1
+        ]
     elif key == glfw.KEY_F:
-        wave_frequency_multiplier = possible_frequencies[possible_frequencies.index(wave_frequency_multiplier) - 1]
+        wave_frequency_multiplier = possible_frequencies[
+            possible_frequencies.index(wave_frequency_multiplier) - 1
+        ]
     elif key == glfw.KEY_D:
         dark_mode = not dark_mode
         brightness_multiplier = 0.6 if dark_mode else 1.0
