@@ -22,10 +22,24 @@ def main():
         vertex_shader=(SHADERS / "water.vert").read_text(encoding="utf-8"),
         fragment_shader=(SHADERS / "color.frag").read_text(encoding="utf-8"),
     )
+    body_shader = current_context.program(
+        vertex_shader=(SHADERS / "body.vert").read_text(encoding="utf-8"),
+        fragment_shader=(SHADERS / "color.frag").read_text(encoding="utf-8"),
+    )
 
     water = construct_water()
     water_raw_data, water_data_organization = construct_vertex_data_and_organization(
         water, current_context, water_shader
+    )
+
+    fish = construct_fish()
+    fish_raw_data, fish_data_organization = construct_vertex_data_and_organization(
+        fish, current_context, body_shader
+    )
+
+    circle = construct_circle()
+    circle_raw_data, circle_data_organization = construct_vertex_data_and_organization(
+        circle, current_context, body_shader
     )
 
     while not glfw.window_should_close(window):
@@ -37,6 +51,11 @@ def main():
         set_uniform_value("u_attenuation", attenuation, water_shader)
         set_uniform_value("u_time", elapsed_time, water_shader)
 
+        set_uniform_value("u_frequency", frequency, body_shader)
+        set_uniform_value("u_amplitude", amplitude, body_shader)
+        set_uniform_value("u_attenuation", attenuation, body_shader)
+        set_uniform_value("u_time", elapsed_time, body_shader)
+
         draw_shape(
             water_data_organization,
             1.0,
@@ -45,6 +64,43 @@ def main():
             water_shader,
         )
 
+        draw_shape(
+            fish_data_organization,
+            0.3,
+            (0.0, -0.2),
+            (1.0, 0.44, 0.2, 1.0),
+            body_shader,
+        )
+
+        draw_shape(
+            circle_data_organization,
+            0.05,
+            (0.12, -0.1),
+            (0.85, 0.85, 1.0, 1.0),
+            body_shader,
+        )
+        draw_shape(
+            circle_data_organization,
+            0.05,
+            (0.22, -0.1),
+            (0.85, 0.85, 1.0, 1.0),
+            body_shader,
+        )
+
+        draw_shape(
+            circle_data_organization,
+            0.02,
+            (0.15, -0.1),
+            (0.15, 0.15, 0.25, 1.0),
+            body_shader,
+        )
+        draw_shape(
+            circle_data_organization,
+            0.02,
+            (0.25, -0.1),
+            (0.15, 0.15, 0.25, 1.0),
+            body_shader,
+        )
         glfw.swap_buffers(window)
         glfw.poll_events()
 
@@ -59,6 +115,22 @@ def construct_water(steps=128):
             np.append(y_coordinates, [-0.9, -0.9]),
         )
     ).T
+
+
+def construct_fish(steps=64):
+    t = np.linspace(0.0, 2.0 * np.pi, steps, endpoint=False)
+    x_coordinates = np.cos(t) - np.sin(t) ** 2 / np.sqrt(2)
+    y_coordinates = np.cos(t) * np.sin(t)
+
+    return np.vstack((x_coordinates, y_coordinates)).T
+
+
+def construct_circle(steps=32):
+    t = np.linspace(0.0, 2.0 * np.pi, steps, endpoint=False)
+    x_coordinates = np.cos(t)
+    y_coordinates = np.sin(t)
+
+    return np.vstack((x_coordinates, y_coordinates)).T
 
 
 def construct_vertex_data_and_organization(vertices, context, shaders_program):
