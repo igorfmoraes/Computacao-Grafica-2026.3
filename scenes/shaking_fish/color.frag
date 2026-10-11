@@ -2,8 +2,8 @@
 in vec4 v2fcolor;
 out vec4 outfragcolor;
 
-uniform float u_attenuation;
+uniform float u_brightness_multiplier;
 
 void main() {
-    outfragcolor = vec4(v2fcolor.rgb * u_attenuation, v2fcolor.a);
+    outfragcolor = vec4(v2fcolor.rgb * u_brightness_multiplier, v2fcolor.a);
 }

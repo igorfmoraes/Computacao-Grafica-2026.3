@@ -6,60 +6,60 @@ from pathlib import Path
 
 SHADERS = Path(__file__).parent / ""
 
-frequency = 3
+wave_frequency_multiplier = 3
 possible_frequencies = [6, 4.5, 3, 1.5]
-amplitude = 16
-possible_amplitudes = [8, 12, 16, 20]
-attenuation = 1.0
+wave_amplitude_divisor = 16
+possible_wave_amplitude_divisors = [8, 12, 16, 20]
+brightness_multiplier = 1.0
 dark_mode = False
 
 
 def main():
     window = create_window()
-    current_context = create_context(window)
+    context = create_context(window)
 
-    water_shader = current_context.program(
+    water_shader = context.program(
         vertex_shader=(SHADERS / "water.vert").read_text(encoding="utf-8"),
         fragment_shader=(SHADERS / "color.frag").read_text(encoding="utf-8"),
     )
-    body_shader = current_context.program(
+    body_shader = context.program(
         vertex_shader=(SHADERS / "body.vert").read_text(encoding="utf-8"),
         fragment_shader=(SHADERS / "color.frag").read_text(encoding="utf-8"),
     )
 
     water = construct_water()
-    water_raw_data, water_data_organization = construct_vertex_data_and_organization(
-        water, current_context, water_shader
+    water_raw_data, water_data_organization = construct_vertex_buffer_and_organization(
+        water, context, water_shader
     )
 
     fish = construct_fish()
-    fish_raw_data, fish_data_organization = construct_vertex_data_and_organization(
-        fish, current_context, body_shader
+    fish_raw_data, fish_data_organization = construct_vertex_buffer_and_organization(
+        fish, context, body_shader
     )
 
     circle = construct_circle()
-    circle_raw_data, circle_data_organization = construct_vertex_data_and_organization(
-        circle, current_context, body_shader
+    circle_raw_data, circle_data_organization = construct_vertex_buffer_and_organization(
+        circle, context, body_shader
     )
 
     while not glfw.window_should_close(window):
-        elapsed_time = glfw.get_time()
-        current_context.clear(
-            np.sqrt(frequency / amplitude) / 1.5 * attenuation,
-            0.45 + np.cos(elapsed_time) / 16 * attenuation,
-            0.92 + np.sin(elapsed_time) / 16 * attenuation,
+        elapsed_time_seconds = glfw.get_time()
+        context.clear(
+            np.sqrt(wave_frequency_multiplier / wave_amplitude_divisor) / 1.5 * brightness_multiplier,
+            (0.45 + np.cos(elapsed_time_seconds) / 16) * brightness_multiplier,
+            (0.92 + np.sin(elapsed_time_seconds) / 16) * brightness_multiplier,
             1.0,
         )
 
-        set_uniform_value("u_frequency", frequency, water_shader)
-        set_uniform_value("u_amplitude", amplitude, water_shader)
-        set_uniform_value("u_attenuation", attenuation, water_shader)
-        set_uniform_value("u_time", elapsed_time, water_shader)
+        set_uniform_value("u_wave_frequency_multiplier", wave_frequency_multiplier, water_shader)
+        set_uniform_value("u_wave_amplitude_divisor", wave_amplitude_divisor, water_shader)
+        set_uniform_value("u_brightness_multiplier", brightness_multiplier, water_shader)
+        set_uniform_value("u_time", elapsed_time_seconds, water_shader)
 
-        set_uniform_value("u_frequency", frequency, body_shader)
-        set_uniform_value("u_amplitude", amplitude, body_shader)
-        set_uniform_value("u_attenuation", attenuation, body_shader)
-        set_uniform_value("u_time", elapsed_time, body_shader)
+        set_uniform_value("u_wave_frequency_multiplier", wave_frequency_multiplier, body_shader)
+        set_uniform_value("u_wave_amplitude_divisor", wave_amplitude_divisor, body_shader)
+        set_uniform_value("u_brightness_multiplier", brightness_multiplier, body_shader)
+        set_uniform_value("u_time", elapsed_time_seconds, body_shader)
 
         draw_shape(
             water_data_organization,
@@ -80,14 +80,14 @@ def main():
         draw_shape(
             circle_data_organization,
             0.05,
-            (0.12 + np.cos(elapsed_time * 0.5 * frequency) / amplitude / 2, -0.1),
+            (0.12 + np.cos(elapsed_time_seconds * 0.5 * wave_frequency_multiplier) / wave_amplitude_divisor / 2, -0.1),
             (0.85, 0.85, 1.0, 1.0),
             body_shader,
         )
         draw_shape(
             circle_data_organization,
             0.05,
-            (0.22 + np.cos(elapsed_time * 0.5 * frequency) / amplitude / 2, -0.1),
+            (0.22 + np.cos(elapsed_time_seconds * 0.5 * wave_frequency_multiplier) / wave_amplitude_divisor / 2, -0.1),
             (0.85, 0.85, 1.0, 1.0),
             body_shader,
         )
@@ -95,14 +95,14 @@ def main():
         draw_shape(
             circle_data_organization,
             0.02,
-            (0.14 + np.cos(elapsed_time * 0.5 * frequency) / amplitude / 1.8, -0.1),
+            (0.14 + np.cos(elapsed_time_seconds * 0.5 * wave_frequency_multiplier) / wave_amplitude_divisor / 1.8, -0.1),
             (0.15, 0.15, 0.25, 1.0),
             body_shader,
         )
         draw_shape(
             circle_data_organization,
             0.02,
-            (0.24 + np.cos(elapsed_time * 0.5 * frequency) / amplitude / 1.8, -0.1),
+            (0.24 + np.cos(elapsed_time_seconds * 0.5 * wave_frequency_multiplier) / wave_amplitude_divisor / 1.8, -0.1),
             (0.15, 0.15, 0.25, 1.0),
             body_shader,
         )
@@ -123,42 +123,42 @@ def construct_water(steps=128):
 
 
 def construct_fish(steps=64):
-    t = np.linspace(0.0, 2.0 * np.pi, steps, endpoint=False)
-    x_coordinates = np.cos(t) - np.sin(t) ** 2 / np.sqrt(2)
-    y_coordinates = np.cos(t) * np.sin(t)
+    angle_radians = np.linspace(0.0, 2.0 * np.pi, steps, endpoint=False)
+    x_coordinates = np.cos(angle_radians) - np.sin(angle_radians) ** 2 / np.sqrt(2)
+    y_coordinates = np.cos(angle_radians) * np.sin(angle_radians)
 
     return np.vstack((x_coordinates, y_coordinates)).T
 
 
 def construct_circle(steps=32):
-    t = np.linspace(0.0, 2.0 * np.pi, steps, endpoint=False)
-    x_coordinates = np.cos(t)
-    y_coordinates = np.sin(t)
+    angles_radian = np.linspace(0.0, 2.0 * np.pi, steps, endpoint=False)
+    x_coordinates = np.cos(angles_radian)
+    y_coordinates = np.sin(angles_radian)
 
     return np.vstack((x_coordinates, y_coordinates)).T
 
 
-def construct_vertex_data_and_organization(vertices, context, shaders_program):
+def construct_vertex_buffer_and_organization(vertices, context, shaders_program):
     # Vertex Buffer Object, stores the raw data (position) to be sent to the GPU
-    vertex_data = context.buffer(np.asarray(vertices, dtype="f4").tobytes())
+    vertex_buffer = context.buffer(np.asarray(vertices, dtype="f4").tobytes())
 
-    vertices_indices = convert_shape_to_triangle_fan(vertices)
-    vertices_indices_bytes = context.buffer(
+    vertices_indices = triangulate_surface_between_two_corners(vertices)
+    index_buffer = context.buffer(
         np.array(vertices_indices, dtype="i4").tobytes()
     )
 
     # Vertex Array Objet, defines the organization/structure of the data (where to split, how to map)
     # 2 floats to be stores in vPosition (x, y)
-    vertex_data_organization = context.vertex_array(
+    vertex_array = context.vertex_array(
         shaders_program,
-        [(vertex_data, "2f", "vPosition")],
-        index_buffer=vertices_indices_bytes,
+        [(vertex_buffer, "2f", "vPosition")],
+        index_buffer=index_buffer,
     )
 
-    return vertex_data, vertex_data_organization
+    return vertex_buffer, vertex_array
 
 
-def convert_shape_to_triangle_fan(vertices):
+def triangulate_surface_between_two_corners(vertices):
     number_of_vertices = len(vertices) - 2
     midpoint_index = number_of_vertices // 2
 
@@ -179,7 +179,7 @@ def convert_shape_to_triangle_fan(vertices):
 
 
 def draw_shape(
-    vertex_data_organization,
+    vertex_array,
     scale,
     offset,
     color,
@@ -189,7 +189,7 @@ def draw_shape(
     set_uniform_value("u_scale", scale, shaders_program)
     set_uniform_value("u_offset", offset, shaders_program)
     set_uniform_value("u_color", np.array(color, dtype=np.float32), shaders_program)
-    vertex_data_organization.render(mode)
+    vertex_array.render(mode)
 
 
 def set_uniform_value(name, value, shaders_program):
@@ -236,18 +236,18 @@ def create_context(window):
 
 
 def process_key(window, key, scancode, action, mods):
-    global amplitude, frequency, attenuation, dark_mode
+    global wave_amplitude_divisor, wave_frequency_multiplier, brightness_multiplier, dark_mode
     if action != glfw.PRESS and action != glfw.REPEAT:
         return
     if key == glfw.KEY_ESCAPE:
         glfw.set_window_should_close(window, True)
     elif key == glfw.KEY_A:
-        amplitude = possible_amplitudes[possible_amplitudes.index(amplitude) - 1]
+        wave_amplitude_divisor = possible_wave_amplitude_divisors[possible_wave_amplitude_divisors.index(wave_amplitude_divisor) - 1]
     elif key == glfw.KEY_F:
-        frequency = possible_frequencies[possible_frequencies.index(frequency) - 1]
+        wave_frequency_multiplier = possible_frequencies[possible_frequencies.index(wave_frequency_multiplier) - 1]
     elif key == glfw.KEY_D:
         dark_mode = not dark_mode
-        attenuation = 0.6 if dark_mode else 1.0
+        brightness_multiplier = 0.6 if dark_mode else 1.0
 
 
 if __name__ == "__main__":
