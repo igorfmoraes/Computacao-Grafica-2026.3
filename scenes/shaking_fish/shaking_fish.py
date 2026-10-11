@@ -15,7 +15,12 @@ dark_mode = False
 
 
 def main():
+    window = create_window(900, 900, "Chacoalha Esse Peixe!")
     context = create_context(window)
+
+    print(
+        "A - Muda Amplitude das Ondas\nF - Muda Frequência das Ondas\nD - Alterna Modo Dia/Noite"
+    )
 
     water_shader = context.program(
         vertex_shader=(SHADERS / "water.vert").read_text(encoding="utf-8"),
