@@ -14,3 +14,11 @@ Instala 4 pacotes
 - moderngl==5.13.0
 - numpy==2.5.3
 - pathlib==1.0.1
+
+## Cenas
+O diretório `scenes` guarda as rederizações, cenas, demos, projetos, exercícios, etc. Dentro deles há arquivos em Python e de shaders do OpenGL (`.vert` e `.frag`). Para rodar, use:
+```
+export XDG_SESSION_TYPE=x11
+python path/to/scene.py
+```
+Com o ambiente virtual ativo. A primeira linha é para funcionar no Linux com Wayland, o GLFW parece depender do X11.
