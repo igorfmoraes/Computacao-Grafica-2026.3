@@ -6,6 +6,13 @@ from pathlib import Path
 
 SHADERS = Path(__file__).parent / ""
 
+frequency = 3
+possible_frequencies = [6, 4.5, 3, 1.5]
+amplitude = 16
+possible_amplitudes = [8, 12, 16, 20]
+attenuation = 1.0
+dark_mode = False
+
 
 def main():
     window = create_window()
@@ -22,7 +29,13 @@ def main():
     )
 
     while not glfw.window_should_close(window):
+        elapsed_time = glfw.get_time()
         current_context.clear(1.0, 1.0, 1.0, 1.0)
+
+        set_uniform_value("u_frequency", frequency, water_shader)
+        set_uniform_value("u_amplitude", amplitude, water_shader)
+        set_uniform_value("u_attenuation", attenuation, water_shader)
+        set_uniform_value("u_time", elapsed_time, water_shader)
 
         draw_shape(
             water_data_organization,
@@ -151,6 +164,13 @@ def process_key(window, key, scancode, action, mods):
         return
     if key == glfw.KEY_ESCAPE:
         glfw.set_window_should_close(window, True)
+    elif key == glfw.KEY_A:
+        amplitude = possible_amplitudes[possible_amplitudes.index(amplitude) - 1]
+    elif key == glfw.KEY_F:
+        frequency = possible_frequencies[possible_frequencies.index(frequency) - 1]
+    elif key == glfw.KEY_D:
+        dark_mode = not dark_mode
+        attenuation = 0.6 if dark_mode else 1.0
 
 
 if __name__ == "__main__":
