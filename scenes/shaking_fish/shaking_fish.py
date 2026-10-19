@@ -83,6 +83,7 @@ def main():
             (0.0, 0.0),
             (0.0, 1.0, 1.0, 1.0),
             water_shader,
+            moderngl.TRIANGLES,
         )
 
         draw_shape(
@@ -222,7 +223,7 @@ def draw_shape(
     offset,
     color,
     shaders_program,
-    mode=moderngl.TRIANGLES,
+    mode=moderngl.TRIANGLE_FAN,
 ):
     set_uniform_value("u_scale", scale, shaders_program)
     set_uniform_value("u_offset", offset, shaders_program)
