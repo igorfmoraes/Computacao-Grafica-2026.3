@@ -4,12 +4,15 @@ import numpy as np
 
 class Mesh:
     def __init__(
-        self, vertices: np.ndarray, draw_mode: int = moderngl.TRIANGLES
+        self,
+        vertices: np.ndarray,
+        draw_mode: int = moderngl.TRIANGLES,
+        triangle_indices: list[int] | None = None,
     ) -> None:
         self.vertices = np.asarray(vertices, dtype="f4")
-        self.triangle_indices = np.array(
-            self._triangulate_between_last_two_vertices(), dtype="i4"
-        )
+        if triangle_indices is None:
+            triangle_indices = self._triangulate_between_last_two_vertices()
+        self.triangle_indices = np.array(triangle_indices, dtype="i4")
         self.draw_mode = draw_mode
 
     @classmethod

@@ -1,8 +1,8 @@
 import moderngl
 import numpy as np
 
-from .shader_program import ShaderProgram
 from .mesh import Mesh
+from .shader_program import ShaderProgram
 
 VERTEX_POSITION_ATTRIBUTE = "vertex_position"
 TWO_FLOATS_PER_VERTEX = "2f"
@@ -23,13 +23,17 @@ class DrawableMesh:
         self._draw_mode = mesh.draw_mode
 
     def draw(
-        self, transform: np.ndarray, color: tuple[float, float, float, float]
+        self,
+        transform: np.ndarray,
+        color: tuple[float, float, float, float],
+        extra_uniforms: dict | None = None,
     ) -> None:
-        self._shader_program.set_uniforms(
-            {
-                # GLSL reads matrices column-major; NumPy stores them row-major.
-                "shape_transform": transform.T,
-                "shape_color": np.array(color, dtype=np.float32),
-            }
-        )
+        uniforms = {
+            # GLSL and numpy have different orientations of matrix
+            "shape_transform": transform.T,
+            "shape_color": np.array(color, dtype=np.float32),
+        }
+        if extra_uniforms:
+            uniforms.update(extra_uniforms)
+        self._shader_program.set_uniforms(uniforms)
         self._vertex_array.render(self._draw_mode)
