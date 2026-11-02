@@ -40,6 +40,7 @@ class Harpoon:
         self._position = np.zeros(2)
         self._direction = np.array([0.0, 1.0])
         self._rotation_radians = 0.0
+        self._previous_tip = np.zeros(2)
 
     @property
     def is_flying(self) -> bool:
@@ -47,8 +48,11 @@ class Harpoon:
 
     @property
     def tip_position(self) -> np.ndarray:
-        """Leading point of the harpoon; intended for collision tests."""
         return self._position + self._direction * TIP_OFFSET * self.SCALE
+
+    @property
+    def previous_tip_position(self) -> np.ndarray:
+        return self._previous_tip.copy()
 
     def fire(self, origin: tuple[float, float], rotation_radians: float) -> None:
         if self._is_flying:
@@ -58,20 +62,24 @@ class Harpoon:
         self._direction = np.array(
             [-np.sin(rotation_radians), np.cos(rotation_radians)]
         )
+        self._previous_tip = self.tip_position
         self._is_flying = True
 
-    def stop(self) -> None:
-        """Ends the flight (called on a hit or when leaving the screen)."""
-        self._is_flying = False
-
-    def update(self, delta_time_seconds: float) -> None:
+    def advance(self, delta_time_seconds: float) -> None:
         if not self._is_flying:
             return
-        self._position += (
-            self._direction * self.SPEED_UNITS_PER_SECOND * delta_time_seconds
+        self._previous_tip = self.tip_position
+        self._position = (
+            self._position
+            + self._direction * self.SPEED_UNITS_PER_SECOND * delta_time_seconds
         )
-        if np.any(np.abs(self._position) > self.SCREEN_LIMIT):
-            self.stop()
+
+    def has_left_screen(self) -> bool:
+        """True once the tail is off screen, which means the whole harpoon is off screen."""
+        return bool(np.any(np.abs(self._position) > self.SCREEN_LIMIT))
+
+    def stop(self) -> None:
+        self._is_flying = False
 
     def draw(self) -> None:
         if not self._is_flying:
