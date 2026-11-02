@@ -21,8 +21,12 @@ class Window:
 
         self._set_aspect_ratio(width_pixels, height_pixels)
 
+    @property
+    def elapsed_time_seconds(self) -> float:
+        return glfw.get_time()
+
     def should_close(self) -> bool:
-        return glfw.window_should_close(self._native_window)
+        return bool(glfw.window_should_close(self._native_window))
 
     def request_close(self) -> None:
         glfw.set_window_should_close(self._native_window, True)
