@@ -48,6 +48,12 @@ class Window:
     def is_key_down(self, key: int) -> bool:
         return glfw.get_key(self._native_window, key) == glfw.PRESS
 
+    def set_vsync(self, enabled: bool) -> None:
+        glfw.swap_interval(1 if enabled else 0)
+
+    def set_title(self, title: str) -> None:
+        glfw.set_window_title(self._native_window, title)
+
     @staticmethod
     def _create_native_window(
         width_pixels: int = 640,
