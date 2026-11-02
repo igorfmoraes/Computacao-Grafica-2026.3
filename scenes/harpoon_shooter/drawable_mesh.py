@@ -23,15 +23,12 @@ class DrawableMesh:
         self._draw_mode = mesh.draw_mode
 
     def draw(
-        self,
-        scale: float,
-        offset: tuple[float, float],
-        color: tuple[float, float, float, float],
+        self, transform: np.ndarray, color: tuple[float, float, float, float]
     ) -> None:
         self._shader_program.set_uniforms(
             {
-                "shape_scale": scale,
-                "shape_offset": offset,
+                # GLSL reads matrices column-major; NumPy stores them row-major.
+                "shape_transform": transform.T,
                 "shape_color": np.array(color, dtype=np.float32),
             }
         )

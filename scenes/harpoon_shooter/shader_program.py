@@ -1,5 +1,7 @@
 from pathlib import Path
+
 import moderngl
+import numpy as np
 
 
 class ShaderProgram:
@@ -22,7 +24,10 @@ class ShaderProgram:
         uniform = self._program.get(name, None)
         if uniform is None:
             return
-        uniform.value = value
+        if isinstance(value, np.ndarray):
+            uniform.write(value.astype(np.float32).tobytes())
+        else:
+            uniform.value = value
 
     def set_uniforms(self, values):
         for name, value in values.items():
