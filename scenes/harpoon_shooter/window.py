@@ -45,6 +45,9 @@ class Window:
     def poll_events(self) -> None:
         glfw.poll_events()
 
+    def is_key_down(self, key: int) -> bool:
+        return glfw.get_key(self._native_window, key) == glfw.PRESS
+
     @staticmethod
     def _create_native_window(
         width_pixels: int = 640,

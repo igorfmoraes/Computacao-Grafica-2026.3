@@ -10,6 +10,7 @@ from .transform import transformation_matrix
 
 SHADERS_DIRECTORY = Path(__file__).parent / "shaders"
 ELLIPSE_POINT_COUNT = 48
+MAX_ROTATION_RADIANS = np.radians(30.0)
 
 COAT_COLOR = (1.0, 0.75, 0.0, 1.0)
 SLEEVE_COLOR = (0.9, 0.65, 0.0, 1.0)
@@ -60,3 +61,12 @@ class Player:
         )
         for drawable_mesh, color in self._parts:
             drawable_mesh.draw(transform, color)
+
+    def rotate(self, delta_radians: float) -> None:
+        self.rotation_radians = float(
+            np.clip(
+                self.rotation_radians + delta_radians,
+                -MAX_ROTATION_RADIANS,
+                MAX_ROTATION_RADIANS,
+            )
+        )

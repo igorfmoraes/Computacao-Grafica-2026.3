@@ -1,4 +1,7 @@
 import sys
+import os
+
+os.environ["XDG_SESSION_TYPE"] = "x11"
 from .window import Window, WindowCreationError
 from .keyboard_controls import KeyboardControls
 from .scene import Scene
@@ -16,12 +19,13 @@ def main() -> None:
         sys.exit(str(error))
 
     context = window.graphics_context
+
     scene = Scene.build(context)
-    keyboard_controls = KeyboardControls(window)
+    keyboard_controls = KeyboardControls(window, scene.player, scene.fire_harpoon)
     window.add_key_press_listener(keyboard_controls.handle_key_press)
     print(KeyboardControls.HELP_TEXT)
 
-    Game(window, scene).run()
+    Game(window, scene, keyboard_controls).run()
 
 
 if __name__ == "__main__":
