@@ -1,3 +1,4 @@
+import sys
 import moderngl
 import glfw
 
@@ -5,6 +6,10 @@ OPENGL_MAJOR_VERSION = 4
 OPENGL_MINOR_VERSION = 0
 MULTISAMPLE_COUNT = 4
 SWAP_INTERVAL_FRAMES = 1
+
+
+class WindowCreationError(RuntimeError):
+    """Raised when GLFW cannot be initialized or cannot create the window."""
 
 
 class Window:
@@ -18,6 +23,9 @@ class Window:
             width_pixels, height_pixels, title
         )
         self.graphics_context = self._create_graphics_context()
+
+        self._key_press_listeners = []
+        glfw.set_key_callback(self._native_window, self._dispatch_key_event)
 
         self._set_aspect_ratio(width_pixels, height_pixels)
 
@@ -43,8 +51,9 @@ class Window:
         height_pixels: int = 640,
         title: str = "GLFW Window",
     ):
+        glfw.set_error_callback(Window._report_glfw_error)
         if not glfw.init():
-            pass
+            raise WindowCreationError("Erro: GLFW Não Conseguiu Iniciar")
 
         Window._apply_window_hints()
         native_window = glfw.create_window(
@@ -53,6 +62,7 @@ class Window:
 
         if not native_window:
             glfw.terminate()
+            raise WindowCreationError("Erro: Não Foi Possível Criar A Janela")
 
         return native_window
 
@@ -64,6 +74,10 @@ class Window:
         glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, glfw.TRUE)
         glfw.window_hint(glfw.SAMPLES, MULTISAMPLE_COUNT)
         glfw.window_hint(glfw.RESIZABLE, glfw.TRUE)
+
+    @staticmethod
+    def _report_glfw_error(code: int, description: str) -> None:
+        print(f"GLFW [{code}]: {description}", file=sys.stderr)
 
     def _create_graphics_context(self) -> moderngl.Context:
         glfw.make_context_current(self._native_window)
@@ -81,3 +95,12 @@ class Window:
 
     def _framebuffer_size_callback(self, window, width, height) -> None:
         self.graphics_context.viewport = (0, 0, width, height)
+
+    def add_key_press_listener(self, listener) -> None:
+        self._key_press_listeners.append(listener)
+
+    def _dispatch_key_event(self, native_window, key, scancode, action, modifiers):
+        if action not in (glfw.PRESS, glfw.REPEAT):
+            return
+        for listener in self._key_press_listeners:
+            listener(key)
