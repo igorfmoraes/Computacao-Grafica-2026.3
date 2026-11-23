@@ -2,3 +2,5 @@ glfw==2.10.2
 moderngl==5.13.0
 numpy==2.5.3
 pathlib==1.0.1
+pillow==13.0.0
+pyglm==2.8.3

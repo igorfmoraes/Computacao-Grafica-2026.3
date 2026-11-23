@@ -9,11 +9,13 @@ source .env/bin/activate
 pip install -r requirements.txt
 ```
 
-Instala 4 pacotes
+Instala 6 pacotes
 - glfw==2.10.2
 - moderngl==5.13.0
 - numpy==2.5.3
 - pathlib==1.0.1
+- pillow==13.0.0
+- pyglm==2.8.3
 
 ## Cenas
 O diretório `scenes` guarda as rederizações, cenas, demos, projetos, exercícios, etc. Dentro deles há arquivos em Python e de shaders do OpenGL (`.vert` e `.frag`). Para rodar, use:
