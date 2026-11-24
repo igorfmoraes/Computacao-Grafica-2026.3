@@ -1,1 +1,1 @@
-"""Orca Escape: jogo 3D de labirinto."""
+"""Orca Escape: 3D maze game."""

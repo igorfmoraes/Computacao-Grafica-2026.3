@@ -2,16 +2,14 @@
 
 MCCC007-23 Computacao Grafica - UFABC - Atividade 05
 
-Uma orca precisa coletar todos os peixes do labirinto e chegar a
-saida (o anel luminoso, que fica verde quando todos os peixes foram
-pegos), sem encostar nas aguas-vivas: cada toque custa uma vida.
+A orca precisa coletar todos os peixes do labirinto e chegar a saida (o
+anel luminoso, que fica verde quando todos os peixes foram pegos), sem
+encostar nas aguas-vivas: cada toque custa uma vida.
 
 Execucao (a partir de scenes/, com o ambiente virtual ativo):
     python -m orca_escape
-No Linux com Wayland, o GLFW precisa de XDG_SESSION_TYPE=x11 (ja
-definido abaixo).
 
-Teclado - movimento continuo (consulta direta):
+Teclado - movimento continuo (consulta direta com glfw.get_key):
     W / seta cima       nada para frente
     S / seta baixo      nada para tras
     A / seta esquerda   gira a esquerda
@@ -35,28 +33,35 @@ Mouse (callbacks):
     arrastar com o botao esquerdo ou direito   gira a camera
     roda                                        aproxima / afasta
 """
+
 import os
 import sys
 
+# GLFW needs X11 on Linux with Wayland, and it reads this when imported.
 os.environ["XDG_SESSION_TYPE"] = "x11"
 
-from .cena import Cena                   # noqa: E402
-from .janela import ErroJanela, Janela   # noqa: E402
-from .jogo import TITULO, Jogo           # noqa: E402
+from .game import BASE_TITLE, Game  # noqa: E402
+from .keyboard_controls import KeyboardControls  # noqa: E402
+from .scene import Scene  # noqa: E402
+from .window import Window, WindowCreationError  # noqa: E402
+
+WINDOW_WIDTH_PIXELS = 1280
+WINDOW_HEIGHT_PIXELS = 720
 
 
-def main():
+def main() -> None:
     try:
-        janela = Janela(1280, 720, TITULO)
-    except ErroJanela as erro:
-        sys.exit(str(erro))
-    cena = Cena(janela.ctx)
-    print(__doc__)
+        window = Window(WINDOW_WIDTH_PIXELS, WINDOW_HEIGHT_PIXELS, BASE_TITLE)
+    except WindowCreationError as error:
+        sys.exit(str(error))
+
+    scene = Scene.build(window.graphics_context)
+    print(KeyboardControls.HELP_TEXT)
     try:
-        Jogo(janela, cena).executar()
+        Game(window, scene).run()
     finally:
-        cena.liberar()
-        janela.encerrar()
+        scene.release()
+        window.terminate()
 
 
 if __name__ == "__main__":
